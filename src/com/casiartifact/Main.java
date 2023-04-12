@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import static com.casiartifact.FileIO.*;
-
+/***
+ * @author Gumani Luvhengo
+ */
 public class Main {
 
     private static final String DEFAULT_PATH = ".%ssrc%scom%scasiartifact%s".
