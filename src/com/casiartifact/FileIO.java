@@ -1,9 +1,6 @@
 package com.casiartifact;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.*;
 
 public class FileIO {
@@ -14,7 +11,8 @@ public class FileIO {
     public final static int INVALID_NUMBER_FORMAT = 3;
     public final static int FILE_CAN_NOT_WRITE = 4;
 
-
+    private PrintWriter printWriter = null;
+    private Scanner reader = null;
 
     public int readIntegers(List<Integer> arrayList, File file){
         if(!file.exists())
@@ -22,7 +20,8 @@ public class FileIO {
 
         if(!file.canRead())
             return FILE_CAN_NOT_OPEN;
-        try (Scanner reader = new Scanner(file)) {
+        try  {
+            reader = new Scanner(file);
             //this is where numbers are read and the converted to integer
 
             arrayList.clear();
@@ -39,6 +38,9 @@ public class FileIO {
         } catch (NumberFormatException e) {
             e.printStackTrace();
             return INVALID_NUMBER_FORMAT;
+        }finally {
+            if(reader !=null)
+                reader.close();
         }
         return SUCCESS;
     }
@@ -53,7 +55,7 @@ public class FileIO {
         if(!file.canWrite())
             return FILE_CAN_NOT_WRITE;
 
-        PrintWriter printWriter = null;
+
         try  {
             printWriter = new PrintWriter(file);
             //this is where numbers are written to the file 'output.txt'
@@ -74,7 +76,6 @@ public class FileIO {
         }
             finally {
             if(printWriter != null){
-
                 printWriter.close();
                 printWriter.flush();
             }
@@ -87,12 +88,7 @@ public class FileIO {
         //sort the numbers
         arrayList.sort((t1, t2) -> t1.compareTo(t2));
 
-        List<Integer> tempList =new ArrayList<>(arrayList.size());
-
-        Collections.copy(arrayList,tempList);
-
         //remove duplicates
-
         for (int i = 0; i < arrayList.size() && i >= 0 ; i++) {
             for (int j = i+1; j < arrayList.size(); j++){
                 /*

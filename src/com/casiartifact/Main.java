@@ -11,8 +11,6 @@ public class Main {
     private static final String DEFAULT_PATH = ".%ssrc%scom%scasiartifact%s".
             formatted(File.separator,File.separator,File.separator,File.separator);
 
-
-
     public static void main(String[] args) {
         FileIO fileIO = new FileIO();
 
@@ -24,38 +22,30 @@ public class Main {
 
         switch (result){
             case SUCCESS -> {
-                //System.out.println(arr);
+
                 System.out.println("File successfully read!");
-
-
-                long st = System.nanoTime();
-
 
                 //filter and sort the array
                 fileIO.filterArray(arr);
 
-                long end = System.nanoTime();
 
-                long elapsedTime = end - st;
-                double elapsedMilliseconds = (double) elapsedTime / 1000000.0;
-                System.out.println("Elapsed time: " + elapsedMilliseconds + " ms");
                 //now we write to a file
                 File outFile = new File(DEFAULT_PATH.concat("output.txt"));
 
                 switch (fileIO.writeToFile(arr,outFile)) {
                     case SUCCESS -> {
-                        System.out.println(arr);
+                        //System.out.println(arr);
 
                         System.out.println("Data successfully written to ".concat(outFile.getName()));
                     }
-                    case FILE_CAN_NOT_WRITE -> {
+                    case FILE_CAN_NOT_WRITE ->
                         System.err.println("Data can not be written to ".concat(outFile.getName()));
-                    }
+
                     case FILE_DOES_NOT_EXIST ->
                             System.err.println("File does not exist");
-                    default -> {
+                    default ->
                         System.err.println("Unexpected error occurred!");
-                    }
+
                 }
 
 

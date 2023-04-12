@@ -1,118 +1,92 @@
 package test;
 
 import com.casiartifact.FileIO;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
-
 import java.io.File;
-import java.nio.file.Path;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 public class FileIOTest {
-    private FileIO obj =null;
+    private FileIO fileIOObj =null;
 
-    private static final String DEFAULT_PATH = ".%ssrc%scom%scasiartifact%s".
-            formatted(File.separator,File.separator,File.separator,File.separator);
 
+    @TempDir
+    private File mockDir;
+    private File mockIOFile;
 
     @BeforeEach
-    public void init(){
-        obj =new FileIO();
+    public void init() throws IOException {
+        fileIOObj =new FileIO();
+        mockIOFile =File.createTempFile("testIO","txt",mockDir);
     }
 
-    @Test
-    public void readIntegers(){
-        List<Integer> arrayList = new ArrayList<>();
-        File testFile = new File(DEFAULT_PATH.concat("hj"));
-
-        obj.readIntegers(arrayList,testFile);
+    @ParameterizedTest
+    @MethodSource("arrayArguments")
+    public void readIntegers(List<Integer> expectedArrayList){
 
 
-        Integer[] expectedArray = {1 ,2, 3, 4, 5, 5, 1, 2, 3};
+        List<Integer> initialArrayList = new ArrayList<>(expectedArrayList.size());
 
-        assertArrayEquals(expectedArray,arrayList.toArray());
+        initialArrayList.addAll(expectedArrayList);
+
+        fileIOObj.writeToFile(initialArrayList,mockIOFile);
+
+        //initialArrayList is cleared before reading any data
+        fileIOObj.readIntegers(initialArrayList,mockIOFile);
+
+
+        assertArrayEquals(expectedArrayList.toArray(),initialArrayList.toArray());
+
+    }
+
+    @ParameterizedTest
+    @MethodSource("arrayArguments")
+    public void writeToFile(List<Integer> initialArrayList){
+
+            int status = fileIOObj.writeToFile(initialArrayList,mockIOFile);
+
+            assertEquals(FileIO.SUCCESS,status);
 
     }
 
 
     @ParameterizedTest
-    @MethodSource("arrayArgument")
-    public void writeToFile(List<Integer> initialArrayList,List<Integer> expectedList){
+    @MethodSource("arrayArguments")
+    public void filterArray(List<Integer> initialArrayList,List<Integer> expectedList){
 
-
-        //creating a mock file
-        File mockFile = mock(File.class);
-
-        when(mockFile.getName()).thenReturn("testOutput.txt");
-        when(mockFile.exists()).thenReturn(true);
-        when(mockFile.canWrite()).thenReturn(true);
-
-
-
-        //File testFile = new File(DEFAULT_PATH.concat("testOutput.txt"));
-
-
-        obj.writeToFile(initialArrayList,mockFile);
-
-        assertArrayEquals(initialArrayList.toArray(),expectedList.toArray());
-
-
+        fileIOObj.filterArray(initialArrayList);
+        assertArrayEquals(expectedList.toArray(),initialArrayList.toArray());
     }
-    private List<Arguments> arrayArguments(){
-        return List.of(
-                Arguments.of( new Integer[]{1, 2, 3, 5, 5, 5, 5, 4, 1, 3}, new Integer[]{1,null,2,3,null,4,5,null,null,null}),
-                Arguments.of( new Integer[]{1, 2, 3, 5, 3, 4, 5, 2, 5, 8},new Integer[]{1,2,null,3,null,4,5,null,null,8}),
-                Arguments.of(new Integer[]{1, 1, 3, 5, 2, 4, 2, 4, 3, 7},new Integer[]{1,null,2,null,3,null,4,null,5,7}),
-                Arguments.of( new Integer[]{1, 3, 3, 5,1,3,43,56,7,45,346,7, 6, 4, 2, 4, 2, 2,43,6,23,52,335,6,2,3},new Integer[]{1,null,2,null,null,null,3,null,null,null,4,null,5,6,null,null,7,null,23,43,null,45,52,56,335,346}),
-                Arguments.of(new Integer[]{1, 3, 3, 3, 2, 1, 1, 4, 13, 2, 2, 2, 3, 4, 5, 1, 2, 41, 2},new Integer[]{1,null,null,null,2,null,null,null,null,null,3,null,null,null,4,null,5,13,41}),
-                Arguments.of(new Integer[]{1, 3, 3, 3, 2, 1, 1, 4, 13, 2,45,3,2,53,32,32,13,3,1},new Integer[]{1,null, null,null,2,null,null, 3, null, null,null,null,4,13,null,32,null,45,53}),
-                Arguments.of(new Integer[]{1, 3, 3, 3, 2, 1, 1, 4, 13, 2, 31, 4, 31 },new Integer[]{1,null,null,2,null,3,null,null,4,null,13,31,null}),
-                Arguments.of( new Integer[]{1, 1, 31, 2, 1, 4, 13, 2, 31, 4, 1},new Integer[]{1,null,null,null,2,null,4,null,13,31,null})
+
+
+    private static List<Arguments> arrayArguments(){
+
+
+        return Arrays.asList(
+                Arguments.arguments(Arrays.asList(1, 2, 3, 5, 5, 5, 5, 4, 1, 3), Arrays.asList(1,null,2,3,null,4,5,null,null,null)),
+                Arguments.arguments(Arrays.asList(1, 2, 3, 5, 3, 4, 5, 2, 5, 8), Arrays.asList(1,2,null,3,null,4,5,null,null,8)),
+                Arguments.arguments(Arrays.asList(1, 1, 3, 5, 2, 4, 2, 4, 3, 7), Arrays.asList(1,null,2,null,3,null,4,null,5,7)),
+                Arguments.arguments(Arrays.asList(1, 3, 3, 5,1,3,43,56,7,45,346,7, 6, 4, 2, 4, 2, 2,43,6,23,52,335,6,2,3), Arrays.asList(1,null,2,null,null,null,3,null,null,null,4,null,5,6,null,null,7,null,23,43,null,45,52,56,335,346)),
+                Arguments.arguments(Arrays.asList(1, 3, 3, 3, 2, 1, 1, 4, 13, 2, 2, 2, 3, 4, 5, 1, 2, 41, 2), Arrays.asList(1,null,null,null,2,null,null,null,null,null,3,null,null,null,4,null,5,13,41)),
+                Arguments.arguments(Arrays.asList(1, 3, 3, 3, 2, 1, 1, 4, 13, 2,45,3,2,53,32,32,13,3,1), Arrays.asList(1,null, null,null,2,null,null, 3, null, null,null,null,4,13,null,32,null,45,53)),
+                Arguments.arguments(Arrays.asList(1, 3, 3, 3, 2, 1, 1, 4, 13, 2, 31, 4, 31), Arrays.asList(1,null,null,2,null,3,null,null,4,null,13,31,null)),
+                Arguments.arguments(Arrays.asList(1, 1, 31, 2, 1, 4, 13, 2, 31, 4, 1), Arrays.asList(1,null,null,null,2,null,4,null,13,31,null)),
+                Arguments.arguments(Arrays.asList(1, -1, 31, 2, 1, 4, 13, 2, 31, 4, 1), Arrays.asList(-1,1,null,null,2,null,4,null,13,31,null)),
+                Arguments.arguments(List.of(1), List.of(1)),
+                Arguments.arguments(List.of(0), List.of(0))
         );
     }
 
-
-    @Test
-    public void filterArray(){
-
-        List<Integer> arrayList = new ArrayList<>();
-        arrayList.add(1);
-        arrayList.add(2);
-        arrayList.add(3);
-        arrayList.add(1);
-        arrayList.add(3);
-        arrayList.add(2);
-        arrayList.add(4);
-        arrayList.add(1);
-
-
-        List<Integer> expectedList = new ArrayList<>();
-        expectedList.add(1);
-        expectedList.add(null);
-        expectedList.add(null);
-        expectedList.add(2);
-        expectedList.add(null);
-        expectedList.add(3);
-        expectedList.add(null);
-        expectedList.add(4);
-
-
-
-        obj.filterArray(arrayList);
-
-        assertArrayEquals(expectedList.toArray(),arrayList.toArray());
-    }
 
 
 }
