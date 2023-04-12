@@ -82,8 +82,8 @@ public class FileIOTest {
                 Arguments.arguments(Arrays.asList(1, 3, 3, 3, 2, 1, 1, 4, 13, 2, 31, 4, 31), Arrays.asList(1,null,null,2,null,3,null,null,4,null,13,31,null)),
                 Arguments.arguments(Arrays.asList(1, 1, 31, 2, 1, 4, 13, 2, 31, 4, 1), Arrays.asList(1,null,null,null,2,null,4,null,13,31,null)),
                 Arguments.arguments(Arrays.asList(1, -1, 31, 2, 1, 4, 13, 2, 31, 4, 1), Arrays.asList(-1,1,null,null,2,null,4,null,13,31,null)),
-                Arguments.arguments(List.of(1), List.of(1)),
-                Arguments.arguments(List.of(0), List.of(0))
+                Arguments.arguments(Arrays.asList(1), Arrays.asList(1)),
+                Arguments.arguments(Arrays.asList(0), Arrays.asList(0))
         );
     }
 
