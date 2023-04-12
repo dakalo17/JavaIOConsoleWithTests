@@ -37,6 +37,14 @@ public class Main {
                         //System.out.println(arr);
 
                         System.out.println("Data successfully written to ".concat(outFile.getName()));
+
+                        int sum = 0;
+                        for (Integer value : arr) {
+                            if(value != null)
+                                sum+=value;
+                        }
+
+                        System.out.println("The Sum of all integers = "+sum);
                     }
                     case FILE_CAN_NOT_WRITE ->
                         System.err.println("Data can not be written to ".concat(outFile.getName()));
